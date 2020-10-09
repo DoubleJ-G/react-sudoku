@@ -18,7 +18,7 @@ const Sudoku = () => {
 	}, []);
 
 	const [selected, setSelected] = useState({ x: 4, y: 4 });
-	const [visible, setVisible] = useState(true);
+	const [visible] = useState(true);
 
 	// Sudoku Game Logic
 
