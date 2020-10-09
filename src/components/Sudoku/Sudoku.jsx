@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
 import './Sudoku.css';
 
@@ -9,6 +9,14 @@ const Sudoku = () => {
 		new Array(9).fill().map(() => new Array(9).fill(0))
 	);
 
+	const [solved, setSolved] = useState(
+		new Array(9).fill().map(() => new Array(9).fill(0))
+	);
+
+	const [candidates, setCandidates] = useState(
+		new Array(9).fill().map(() => new Array(9).fill().map(() => []))
+	);
+
 	const [readonly, setReadonly] = useState(
 		new Array(9).fill().map(() => new Array(9).fill(false))
 	);
@@ -17,7 +25,7 @@ const Sudoku = () => {
 		newSudoku(35);
 	}, []);
 
-	const [visible] = useState(true);
+	// const [visible] = useState(true);
 	const [notes, setNotes] = useState(false);
 	// Sudoku Controls
 
@@ -44,19 +52,36 @@ const Sudoku = () => {
 			});
 		});
 		setSudoku(sud);
+		setSolved(
+			SudokuToolCollection().conversions.stringToGrid(
+				SudokuToolCollection().solver.solve(
+					SudokuToolCollection().conversions.gridToString(sud)
+				)
+			)
+		);
 		setReadonly(r);
 	}
 
 	function setCell(x, y, value) {
-		console.log(x, y);
-		if (!readonly[y][x]) {
-			const copy = sudoku.slice();
-			copy[y][x] = value;
-			setSudoku(copy);
+		if (notes && value !== 0) {
+			const copy = candidates.slice();
+			if (copy[y][x].includes(value)) {
+				copy[y][x].splice(copy[y][x].indexOf(value), 1);
+			} else {
+				copy[y][x].push(value);
+			}
+
+			setCandidates(copy);
+		} else {
+			if (!readonly[y][x]) {
+				const copy = sudoku.slice();
+				copy[y][x] = value;
+				setSudoku(copy);
+			}
 		}
 	}
 
-	const [selected, setSelected] = useState([{ x: 4, y: 4 }]);
+	const [selected, setSelected] = useState([]);
 	function isSelected(x, y) {
 		if (selected.length === 1) {
 			// Single Selections
@@ -87,7 +112,7 @@ const Sudoku = () => {
 			}
 		}
 
-		return '';
+		return false;
 	}
 
 	const [multi, setMulti] = useState(false);
@@ -117,7 +142,12 @@ const Sudoku = () => {
 		}
 
 		// Clear number for selected cell
-		if (code === 'Escape' || code === 'Backspace' || key === '-') {
+		if (
+			code === 'Escape' ||
+			code === 'Backspace' ||
+			code == 'Delete' ||
+			key === '-'
+		) {
 			for (const point of selected) {
 				setCell(point.x, point.y, 0);
 			}
@@ -128,31 +158,11 @@ const Sudoku = () => {
 		if (key === 'Control') {
 			setMulti(true);
 		}
-		if (key === 'w' || key === 'ArrowUp') {
-			// Arrow Keys and WASD for selection movement
 
-			// Up
-			if (selected.y !== 0) {
-				addToSelected({ x: selected.x, y: selected.y - 1 });
-			}
-		}
-		// Down
-		if (key === 's' || key === 'ArrowDown') {
-			if (selected.y !== 8) {
-				addToSelected({ x: selected.x, y: selected.y + 1 });
-			}
-		}
-		// Left
-		if (key === 'a' || key === 'ArrowLeft') {
-			if (selected.x !== 0) {
-				addToSelected({ x: selected.x - 1, y: selected.y });
-			}
-		}
-		// Right
-		if (key === 'd' || key === 'ArrowRight') {
-			if (selected.x !== 8) {
-				addToSelected({ x: selected.x + 1, y: selected.y });
-			}
+		// Toggle Notes
+
+		if (code === 'Space') {
+			setNotes(!notes);
 		}
 	}
 
@@ -174,19 +184,26 @@ const Sudoku = () => {
 			document.removeEventListener('keydown', keydown);
 			document.removeEventListener('keyup', keyup);
 		};
-	}, [selected]);
+	}, [selected, notes]);
 
 	// Mouse Events
 
 	const [mouseDown, setMouseDown] = useState(false);
+	const [useNew, setUseNew] = useState(false);
 	function mousedown(e) {
 		// setMulti(true);
 		setMouseDown(true);
+		if (multi) {
+			setUseNew(false);
+		} else {
+			setSelected([]);
+		}
 	}
 
 	function mouseup(e) {
 		// setMulti(false);
 		setMouseDown(false);
+		setUseNew(true);
 	}
 	useEffect(() => {
 		//Setup Listeners
@@ -197,7 +214,7 @@ const Sudoku = () => {
 			document.removeEventListener('mousedown', mousedown);
 			document.removeEventListener('mouseup', mouseup);
 		};
-	}, [selected]);
+	}, [selected, multi]);
 
 	return (
 		<div className='SudokuGame'>
@@ -214,12 +231,15 @@ const Sudoku = () => {
 								classes.push(isSelected(cIndex, rIndex));
 
 								// Exact match to row/col selected
-								const mainSelected =
-									selected[0].x === cIndex &&
-									selected[0].y === rIndex;
 
-								if (mainSelected) {
-									classes.push('selected-main');
+								if (selected.length > 0) {
+									const mainSelected =
+										selected[0].x === cIndex &&
+										selected[0].y === rIndex;
+
+									if (mainSelected) {
+										classes.push('selected-main');
+									}
 								}
 
 								// Display readonly differently
@@ -227,31 +247,73 @@ const Sudoku = () => {
 								if (isReadOnly) {
 									classes.push('cell-readonly');
 								} else {
-									classes.push('cell-userinput');
+									const isMistake =
+										sudoku[rIndex][cIndex] !=
+										solved[rIndex][cIndex];
+									if (isMistake) {
+										classes.push('cell-error');
+									} else {
+										classes.push('cell-userinput');
+									}
+								}
+								let cellDisplay;
+								// Single Display
+								if (
+									candidates[rIndex][cIndex].length < 1 ||
+									isReadOnly ||
+									sudoku[rIndex][cIndex] !== 0
+								) {
+									cellDisplay = cell === 0 ? ' ' : cell;
+								} else {
+									const c = [];
+									for (var n = 1; n < 10; n++) {
+										if (
+											candidates[rIndex][cIndex].includes(
+												n
+											)
+										) {
+											c.push(n);
+										} else {
+											c.push(' ');
+										}
+									}
+
+									cellDisplay = (
+										<div className='candidates'>
+											{c.map((n, i) => {
+												return <div key={i}>{n}</div>;
+											})}
+										</div>
+									);
 								}
 
-								// Dynamic Display
-
-								const displayValue = visible
-									? cell === 0
-										? ' '
-										: cell
-									: ' ';
+								// Multi Display
 
 								return (
 									<div
 										className={classes.join(' ')}
 										key={cIndex}
-										onClick={() =>
-											addToSelected(cIndex, rIndex)
-										}
+										onClick={() => {
+											addToSelected(cIndex, rIndex);
+										}}
 										onMouseMove={() => {
-											if (mouseDown) {
+											let alreadySelected = false;
+
+											for (const point of selected) {
+												if (
+													point.x == cIndex &&
+													point.y == rIndex
+												) {
+													alreadySelected = true;
+													break;
+												}
+											}
+											if (mouseDown && !alreadySelected) {
 												addToSelected(cIndex, rIndex);
 											}
 										}}
 									>
-										{displayValue}
+										{cellDisplay}
 									</div>
 								);
 							})}
@@ -264,15 +326,7 @@ const Sudoku = () => {
 				<button onClick={() => newSudoku(17)}>New Game</button>
 				<button
 					onClick={() => {
-						setSudoku(
-							SudokuToolCollection().conversions.stringToGrid(
-								SudokuToolCollection().solver.solve(
-									SudokuToolCollection().conversions.gridToString(
-										sudoku
-									)
-								)
-							)
-						);
+						setSudoku(solved);
 					}}
 				>
 					Solve Game
