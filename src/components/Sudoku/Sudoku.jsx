@@ -20,10 +20,19 @@ const Sudoku = () => {
 	const [selected, setSelected] = useState({ x: 4, y: 4 });
 	const [visible] = useState(true);
 
+	// Sudoku Controls
+
+	const [tiles, setTiles] = useState(20);
+	function handleChange(e) {
+		setTiles(parseInt(e.target.value));
+		newSudoku();
+	}
+
 	// Sudoku Game Logic
 
-	function newSudoku(tiles) {
-		const str = SudokuToolCollection().generator.generate(32);
+	function newSudoku() {
+		const str = SudokuToolCollection().generator.generate(tiles);
+		console.log(tiles);
 		const sud = SudokuToolCollection().conversions.stringToGrid(str);
 		const r = new Array(9).fill().map(() => new Array(9).fill(false));
 		sud.forEach((row, rIndex) => {
@@ -187,6 +196,14 @@ const Sudoku = () => {
 				>
 					Solve Game
 				</button>
+				<span>Tiles: {tiles}</span>
+				<input
+					type='range'
+					min='17'
+					max='80'
+					value={tiles}
+					onChange={handleChange}
+				/>
 			</div>
 		</div>
 	);
