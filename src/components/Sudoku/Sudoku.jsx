@@ -2,16 +2,11 @@ import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
 import './Sudoku.css';
 
-import SudokuToolCollection from 'sudokutoolcollection';
-
+import SudokuJS from './Sudoku';
 const Sudoku = () => {
-	const [sudoku, setSudoku] = useState(
-		new Array(9).fill().map(() => new Array(9).fill(0))
-	);
+	const [sudoku, setSudoku] = useState(SudokuJS.blankGrid());
 
-	const [solved, setSolved] = useState(
-		new Array(9).fill().map(() => new Array(9).fill(0))
-	);
+	const [solved, setSolved] = useState(SudokuJS.blankGrid());
 
 	const [candidates, setCandidates] = useState(
 		new Array(9).fill().map(() => new Array(9).fill().map(() => []))
@@ -21,6 +16,8 @@ const Sudoku = () => {
 		new Array(9).fill().map(() => new Array(9).fill(false))
 	);
 
+	const [showMistakes, setShowMistakes] = useState(true);
+
 	useEffect(() => {
 		newSudoku(35);
 	}, []);
@@ -29,7 +26,7 @@ const Sudoku = () => {
 	const [notes, setNotes] = useState(false);
 	// Sudoku Controls
 
-	const [tiles, setTiles] = useState(20);
+	const [tiles, setTiles] = useState(50);
 	function handleChange(e) {
 		setTiles(parseInt(e.target.value));
 		newSudoku();
@@ -38,28 +35,26 @@ const Sudoku = () => {
 	// Sudoku Game Logic
 
 	function newSudoku() {
-		const str = SudokuToolCollection().generator.generate(tiles);
-		console.log(tiles);
-		const sud = SudokuToolCollection().conversions.stringToGrid(str);
+		const newSudoku = SudokuJS.newGrid(tiles);
+		const copy = SudokuJS.copyGrid(newSudoku);
+		const newSolve = SudokuJS.solveGrid(copy);
+		setSudoku(newSudoku);
+		setSolved(newSolve);
+
 		const r = new Array(9).fill().map(() => new Array(9).fill(false));
-		sud.forEach((row, rIndex) => {
+		newSudoku.forEach((row, rIndex) => {
 			row.forEach((cell, cIndex) => {
-				if (cell === '.') {
-					sud[rIndex][cIndex] = 0;
+				if (cell == 0) {
+					r[rIndex][cIndex] = false;
 				} else {
 					r[rIndex][cIndex] = true;
 				}
 			});
 		});
-		setSudoku(sud);
-		setSolved(
-			SudokuToolCollection().conversions.stringToGrid(
-				SudokuToolCollection().solver.solve(
-					SudokuToolCollection().conversions.gridToString(sud)
-				)
-			)
-		);
 		setReadonly(r);
+		setCandidates(
+			new Array(9).fill().map(() => new Array(9).fill().map(() => []))
+		);
 	}
 
 	function setCell(x, y, value) {
@@ -90,7 +85,7 @@ const Sudoku = () => {
 
 			if (sudoku[point.y][point.x] !== 0) {
 				// Cell has a value
-				return sudoku[point.y][point.x] === sudoku[y][x]
+				return sudoku[point.y][point.x] == sudoku[y][x]
 					? 'selected'
 					: '';
 			} else {
@@ -250,7 +245,7 @@ const Sudoku = () => {
 									const isMistake =
 										sudoku[rIndex][cIndex] !=
 										solved[rIndex][cIndex];
-									if (isMistake) {
+									if (isMistake && showMistakes) {
 										classes.push('cell-error');
 									} else {
 										classes.push('cell-userinput');
@@ -323,7 +318,7 @@ const Sudoku = () => {
 			</div>
 			<div className='Controls'>
 				<h1>Controls</h1>
-				<button onClick={() => newSudoku(17)}>New Game</button>
+				<button onClick={() => newSudoku(tiles)}>New Game</button>
 				<button
 					onClick={() => {
 						setSudoku(solved);
@@ -334,14 +329,18 @@ const Sudoku = () => {
 				<span>Tiles: {tiles}</span>
 				<input
 					type='range'
-					min='17'
-					max='80'
+					min='30'
+					max='81'
 					value={tiles}
 					onChange={handleChange}
 				/>
+				<button onClick={() => setShowMistakes(!showMistakes)}>
+					Show Mistakes: {showMistakes ? 'On' : 'Off'}
+				</button>
 				<button onClick={() => setNotes(!notes)}>
 					Notes: {notes ? 'On' : 'Off'}
 				</button>
+
 				<button onClick={() => setMulti(!multi)}>
 					Select Mode: {multi ? ' Multi' : 'Single'}
 				</button>
