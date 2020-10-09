@@ -123,12 +123,15 @@ const Sudoku = () => {
 
 								// If in same row, col or square
 								const isSelected =
-									selected.x === cIndex ||
-									selected.y === rIndex ||
-									(Math.floor(selected.x / 3) ===
-										Math.floor(cIndex / 3) &&
-										Math.floor(selected.y / 3) ===
-											Math.floor(rIndex / 3));
+									sudoku[selected.y][selected.x] != 0
+										? sudoku[selected.y][selected.x] ==
+										  sudoku[rIndex][cIndex]
+										: selected.x === cIndex ||
+										  selected.y === rIndex ||
+										  (Math.floor(selected.x / 3) ===
+												Math.floor(cIndex / 3) &&
+												Math.floor(selected.y / 3) ===
+													Math.floor(rIndex / 3));
 
 								if (isSelected) {
 									classes.push('selected');
