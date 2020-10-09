@@ -317,33 +317,58 @@ const Sudoku = () => {
 				})}
 			</div>
 			<div className='Controls'>
-				<h1>Controls</h1>
-				<button onClick={() => newSudoku(tiles)}>New Game</button>
-				<button
-					onClick={() => {
-						setSudoku(solved);
-					}}
-				>
-					Solve Game
-				</button>
-				<span>Tiles: {tiles}</span>
-				<input
-					type='range'
-					min='30'
-					max='81'
-					value={tiles}
-					onChange={handleChange}
-				/>
-				<button onClick={() => setShowMistakes(!showMistakes)}>
-					Show Mistakes: {showMistakes ? 'On' : 'Off'}
-				</button>
-				<button onClick={() => setNotes(!notes)}>
-					Notes: {notes ? 'On' : 'Off'}
-				</button>
+				<div className='options'>
+					<h1>Controls</h1>
+					<button onClick={() => newSudoku(tiles)}>New Game</button>
+					<button
+						onClick={() => {
+							setSudoku(solved);
+						}}
+					>
+						Solve Game
+					</button>
+					<span>Tiles: {tiles}</span>
+					<input
+						type='range'
+						min='30'
+						max='81'
+						value={tiles}
+						onChange={handleChange}
+					/>
+					<button onClick={() => setShowMistakes(!showMistakes)}>
+						Show Mistakes: {showMistakes ? 'On' : 'Off'}
+					</button>
+					<button onClick={() => setNotes(!notes)}>
+						Notes: {notes ? 'On' : 'Off'}
+					</button>
 
-				<button onClick={() => setMulti(!multi)}>
-					Select Mode: {multi ? ' Multi' : 'Single'}
-				</button>
+					<button onClick={() => setMulti(!multi)}>
+						Select Mode: {multi ? ' Multi' : 'Single'}
+					</button>
+				</div>
+
+				<div className='keypad'>
+					<div
+						onClick={() => {
+							console.log(1);
+							for (const point of selected) {
+								console.log(point);
+								setCell(point.x, point.y, 1);
+							}
+						}}
+					>
+						1
+					</div>
+					<div>2</div>
+					<div>3</div>
+					<div>4</div>
+					<div>5</div>
+					<div>6</div>
+					<div>7</div>
+					<div>8</div>
+					<div>9</div>
+					<div className='del'>Delete</div>
+				</div>
 			</div>
 		</div>
 	);

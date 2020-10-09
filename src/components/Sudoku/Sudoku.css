@@ -4,13 +4,19 @@
 }
 
 .Controls {
-	margin-left: 30px;
-	text-align: center;
+	margin-left: 50px;
 	display: flex;
 	flex-direction: column;
+	text-align: center;
 }
 
-.Controls > button {
+.options {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+}
+
+.Controls button {
 	height: 34px;
 	margin: 5px 0;
 }
@@ -22,8 +28,8 @@
 .Sudoku {
 	user-select: none;
 
-	height: 900px;
-	width: 900px;
+	height: 50vw;
+	width: 50vw;
 
 	display: grid;
 	grid-template-rows: repeat(9, 1fr);
@@ -100,4 +106,58 @@
 	align-items: center;
 
 	font-size: 16px;
+}
+
+.keypad {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	width: 300px;
+	height: 400px;
+	margin: auto;
+}
+
+.keypad > div {
+	border: 1px solid #aaa;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.del {
+	grid-column-end: 3;
+}
+
+@media only screen and (max-width: 768px) {
+	.SudokuGame {
+		flex-direction: column;
+	}
+	.Sudoku {
+		width: 550px;
+		height: 550px;
+
+		margin: auto;
+	}
+	.Controls {
+		flex-direction: column-reverse;
+		margin: 0;
+		width: 100vw;
+	}
+	.Controls h1 {
+		display: none;
+	}
+	.options {
+		margin: 0;
+		flex-direction: column-reverse;
+	}
+	.keypad {
+		grid-template-columns: repeat(10, 1fr);
+		width: 500px;
+		height: 50px;
+
+		margin-top: 10px;
+	}
+	.del {
+		grid-column-end: none;
+	}
 }
