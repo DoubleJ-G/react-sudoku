@@ -1,9 +1,18 @@
 .SudokuGame {
 	display: flex;
+	justify-content: center;
 }
 
 .Controls {
 	margin-left: 30px;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+}
+
+.Controls > button {
+	height: 34px;
+	margin-bottom: 15px;
 }
 
 .Sudoku {
