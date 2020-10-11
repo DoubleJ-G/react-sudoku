@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useEffect, useState } from 'react';
 import './Sudoku.css';
 
@@ -33,7 +33,7 @@ const Sudoku = () => {
 
 	// Sudoku Game Logic
 
-	function newSudoku() {
+	function newSudoku(sudokuString = null) {
 		const newSudoku = SudokuJS.newGrid(tiles);
 		const copy = SudokuJS.copyGrid(newSudoku);
 		const newSolve = SudokuJS.solveGrid(copy);
@@ -46,7 +46,7 @@ const Sudoku = () => {
 		const r = new Array(9).fill().map(() => new Array(9).fill(false));
 		newSudoku.forEach((row, rIndex) => {
 			row.forEach((cell, cIndex) => {
-				if (cell == 0) {
+				if (cell === 0) {
 					r[rIndex][cIndex] = false;
 				} else {
 					r[rIndex][cIndex] = true;
@@ -104,7 +104,7 @@ const Sudoku = () => {
 
 			if (sudoku[point.y][point.x] !== 0) {
 				// If current cell is not 0 higligt all matching numbers
-				return sudoku[point.y][point.x] == sudoku[y][x]
+				return sudoku[point.y][point.x] === sudoku[y][x]
 					? 'selected'
 					: '';
 			} else {
@@ -160,7 +160,7 @@ const Sudoku = () => {
 		if (
 			code === 'Escape' ||
 			code === 'Backspace' ||
-			code == 'Delete' ||
+			code === 'Delete' ||
 			key === '-'
 		) {
 			for (const point of selected) {
@@ -184,7 +184,7 @@ const Sudoku = () => {
 	// Key Press for changing cell values
 
 	function keyup(e) {
-		const { key, code } = e;
+		const { key } = e;
 		if (key === 'Control') {
 			setMulti(false);
 		}
@@ -231,6 +231,18 @@ const Sudoku = () => {
 		};
 	}, [selected, multi]);
 
+	// Misc functions
+
+	function copy(text) {
+		var input = document.createElement('input');
+		input.setAttribute('value', text);
+		document.body.appendChild(input);
+		input.select();
+		var result = document.execCommand('copy');
+		document.body.removeChild(input);
+		return result;
+	}
+
 	return (
 		<div className='SudokuGame'>
 			<div className='Sudoku'>
@@ -263,7 +275,7 @@ const Sudoku = () => {
 									classes.push('cell-readonly');
 								} else {
 									const isMistake =
-										sudoku[rIndex][cIndex] !=
+										sudoku[rIndex][cIndex] !==
 										solved[rIndex][cIndex];
 									if (isMistake && showMistakes) {
 										classes.push('cell-error');
@@ -316,8 +328,8 @@ const Sudoku = () => {
 
 											for (const point of selected) {
 												if (
-													point.x == cIndex &&
-													point.y == rIndex
+													point.x === cIndex &&
+													point.y === rIndex
 												) {
 													alreadySelected = true;
 													break;
@@ -370,6 +382,21 @@ const Sudoku = () => {
 					<button onClick={() => setMulti(!multi)}>
 						Select Mode: {multi ? ' Multi' : 'Single'}
 					</button>
+					<hr />
+					<span>Import Game</span>
+					<div>
+						<input type='text' />
+						<button>Import </button>
+					</div>
+					<span>Export Game</span>
+					<div>
+						<input value={SudokuJS.gridToString(sudoku)} />
+						<button
+							onClick={() => copy(SudokuJS.gridToString(sudoku))}
+						>
+							Copy
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

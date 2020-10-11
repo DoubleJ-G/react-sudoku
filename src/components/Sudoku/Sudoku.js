@@ -67,21 +67,22 @@ function possible(grid, row, col, num, zeroIsValid = true) {
 	if (num >= 0 && num <= 9) {
 		/* Handle what we want to do when the number is 0
         Sometimes we want to ignore zeros in our checks */
-		if (num == 0) {
+		if (num === 0) {
 			return zeroIsValid;
 		}
 		/* Start checking rows, cols and squares for the same number
-        Ignore checking the [row][col] we are searching */
+				Ignore checking the [row][col] we are searching */
+		let r, c;
 		// Row Check
-		for (var r = 0; r < 9; r++) {
-			if (row != r && grid[r][col] == num) {
+		for (r = 0; r < 9; r++) {
+			if (row !== r && grid[r][col] === num) {
 				return false;
 			}
 		}
 		// Col Check
-		for (var c = 0; c < 9; c++) {
+		for (c = 0; c < 9; c++) {
 			// c != col skips current cell
-			if (c != col && grid[row][c] === num) {
+			if (c !== col && grid[row][c] === num) {
 				return false;
 			}
 		}
@@ -89,12 +90,13 @@ function possible(grid, row, col, num, zeroIsValid = true) {
 		// Get Starting points of the square
 		let x = Math.floor(col / 3) * 3; // Possible 0, 3 or 6
 		let y = Math.floor(row / 3) * 3; // Possible 0, 3 or 6
+
 		// Start at y, then go y+1, y+2
-		for (var r = y; r < y + 3; r++) {
+		for (r = y; r < y + 3; r++) {
 			// Start at x, then go x+1, x+2
-			for (var c = x; c < x + 3; c++) {
+			for (c = x; c < x + 3; c++) {
 				// c != col && r != row prevents checking current cell
-				if (c != col && r != row && grid[r][c] == num) {
+				if (c !== col && r !== row && grid[r][c] === num) {
 					return false;
 				}
 			}
