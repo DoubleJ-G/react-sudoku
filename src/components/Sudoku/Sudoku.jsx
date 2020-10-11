@@ -5,7 +5,7 @@ import './Sudoku.css';
 import SudokuJS from './Sudoku';
 const Sudoku = () => {
 	const [sudoku, setSudoku] = useState(SudokuJS.blankGrid());
-
+	const [notes, setNotes] = useState(false);
 	const [solved, setSolved] = useState(SudokuJS.blankGrid());
 
 	const [candidates, setCandidates] = useState(
@@ -18,12 +18,11 @@ const Sudoku = () => {
 
 	const [showMistakes, setShowMistakes] = useState(true);
 
+	// First Load
 	useEffect(() => {
 		newSudoku(35);
 	}, []);
 
-	// const [visible] = useState(true);
-	const [notes, setNotes] = useState(false);
 	// Sudoku Controls
 
 	const [tiles, setTiles] = useState(50);
@@ -38,8 +37,11 @@ const Sudoku = () => {
 		const newSudoku = SudokuJS.newGrid(tiles);
 		const copy = SudokuJS.copyGrid(newSudoku);
 		const newSolve = SudokuJS.solveGrid(copy);
+
 		setSudoku(newSudoku);
 		setSolved(newSolve);
+
+		// Set all generated values to read only
 
 		const r = new Array(9).fill().map(() => new Array(9).fill(false));
 		newSudoku.forEach((row, rIndex) => {
@@ -52,15 +54,22 @@ const Sudoku = () => {
 			});
 		});
 		setReadonly(r);
+
+		// Empty Candidates
 		setCandidates(
 			new Array(9).fill().map(() => new Array(9).fill().map(() => []))
 		);
 	}
 
+	// Handles logic of input to cells
 	function setCell(x, y, value) {
-		if (notes && value !== 0) {
+		// If we're writing notes on an empty sqaure
+		if (notes && value !== 0 && !readonly[y][x]) {
+			// DOn't mutate state directly
 			const copy = candidates.slice();
+
 			if (copy[y][x].includes(value)) {
+				// Remove values from candidates if already existed
 				copy[y][x].splice(copy[y][x].indexOf(value), 1);
 			} else {
 				copy[y][x].push(value);
@@ -68,15 +77,25 @@ const Sudoku = () => {
 
 			setCandidates(copy);
 		} else {
+			// Setting single value to cell if its not readonly
 			if (!readonly[y][x]) {
 				const copy = sudoku.slice();
-				copy[y][x] = value;
+				// Delete's value if same key is pressed
+				if (value === sudoku[y][x]) {
+					copy[y][x] = 0;
+				} else {
+					copy[y][x] = value;
+				}
+
 				setSudoku(copy);
 			}
 		}
 	}
 
 	const [selected, setSelected] = useState([]);
+
+	// Determine if cells should be highlighted
+
 	function isSelected(x, y) {
 		if (selected.length === 1) {
 			// Single Selections
@@ -84,12 +103,12 @@ const Sudoku = () => {
 			const point = selected[0];
 
 			if (sudoku[point.y][point.x] !== 0) {
-				// Cell has a value
+				// If current cell is not 0 higligt all matching numbers
 				return sudoku[point.y][point.x] == sudoku[y][x]
 					? 'selected'
 					: '';
 			} else {
-				// Cell is blank
+				// Highlight all cells in row, col and square
 				return point.x === x ||
 					point.y === y ||
 					(Math.floor(point.x / 3) === Math.floor(x / 3) &&
@@ -98,7 +117,7 @@ const Sudoku = () => {
 					: '';
 			}
 		} else {
-			// Multi Selects
+			// Highlight multiple individually selcted cells
 
 			for (var p = 0; p < selected.length; p++) {
 				if (selected[p].x === x && selected[p].y === y) {
@@ -113,6 +132,7 @@ const Sudoku = () => {
 	const [multi, setMulti] = useState(false);
 
 	function addToSelected(x, y) {
+		// This logic allows 'groups' of cells to be selected without the previous cells persisting
 		if (multi || mouseDown) {
 			const copy = selected.slice();
 			copy.push({ x, y });
@@ -319,7 +339,12 @@ const Sudoku = () => {
 			<div className='Controls'>
 				<div className='options'>
 					<h1>Controls</h1>
-					<button onClick={() => newSudoku(tiles)}>New Game</button>
+					<button
+						onClick={() => newSudoku(tiles)}
+						className='selected'
+					>
+						New Game
+					</button>
 					<button
 						onClick={() => {
 							setSudoku(solved);
@@ -345,29 +370,6 @@ const Sudoku = () => {
 					<button onClick={() => setMulti(!multi)}>
 						Select Mode: {multi ? ' Multi' : 'Single'}
 					</button>
-				</div>
-
-				<div className='keypad'>
-					<div
-						onClick={() => {
-							console.log(1);
-							for (const point of selected) {
-								console.log(point);
-								setCell(point.x, point.y, 1);
-							}
-						}}
-					>
-						1
-					</div>
-					<div>2</div>
-					<div>3</div>
-					<div>4</div>
-					<div>5</div>
-					<div>6</div>
-					<div>7</div>
-					<div>8</div>
-					<div>9</div>
-					<div className='del'>Delete</div>
 				</div>
 			</div>
 		</div>
