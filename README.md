@@ -2,7 +2,7 @@
 
 [Live Version with Netliy](https://inspiring-fermat-c3347a.netlify.app/)
 
-Front end display using my own sudoku library. [source](<(https://github.com/DoubleJ-G/sudoku)>)
+Front end display using my own sudoku library. [source](https://github.com/DoubleJ-G/sudoku)
 
 ## Installation
 
