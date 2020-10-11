@@ -1,15 +1,13 @@
-# Sudoku Game in React
+# Sudoku Game built with create react app
 
-[Deployed on Netlify](https://inspiring-fermat-c3347a.netlify.app/)
+[Live Version with Netliy](https://inspiring-fermat-c3347a.netlify.app/)
 
-# Controls
+Front end display using my own sudoku library. [source](<(https://github.com/DoubleJ-G/sudoku)>)
 
-1-9 for settings numbers
+## Installation
 
-0, BackSpace, Escape and - Delete remove numbers from cells
+Project can be cloned and ran with `npm install && npm start`
 
-Ctrl+Click for selecting multipe cells
+## About
 
-Click+Drag for selecting multiple cells
-
-Spacebar toggles notes mode
+This project makes use of a sudoku generator/solver to display a game to a user. The front end is rendered with react and the game logic is my own implementation of a recursive back tracking algorithim.
